@@ -78,7 +78,7 @@ class Model(nn.Module):
 
         return dec_out
 
-    def calculate_gcd_period_mean(self, x):  # 傅里叶变换求周期
+    def calculate_gcd_period_mean(self, x):  
         batch_size, time_steps, num_variates = x.shape
         # all_batch_gcds = []
 
@@ -87,14 +87,13 @@ class Model(nn.Module):
             for variate in range(num_variates):
                 variate_data = x[batch, :, variate]
                 variate_data_without_dc = variate_data - torch.mean(variate_data)
-                # 对 tensor 数据进行傅里叶变换
+               
                 X = torch.fft.fft(variate_data_without_dc)
                 magnitude_spectrum = torch.abs(X)
-                peak_indices = torch.argsort(magnitude_spectrum, dim=0)[-3:]  # 找到幅度谱中最大的两个峰值（除了直流分量 k = 0）
+                peak_indices = torch.argsort(magnitude_spectrum, dim=0)[-3:] 
                 valid_periods = []
                 for peak_idx in peak_indices:
                     if peak_idx != 0:
-                        # 计算周期估计值
                         period_estimate = time_steps / peak_idx.item()
                         valid_periods.append(period_estimate)
                 if valid_periods:
@@ -104,7 +103,7 @@ class Model(nn.Module):
             batch_periods = Counter(batch_periods)
             counts = 3
             batch_periods = [num for num in batch_periods if batch_periods[num] >= counts]
-            # 计算当前 batch 中所有特征周期的最大公约数
+            
             if batch_periods:
                 current_batch_gcd = int(math.floor(batch_periods[0]))
                 for period in batch_periods[1:]:
@@ -113,11 +112,7 @@ class Model(nn.Module):
                 break
         return all_batch_gcds
 
-        # # 计算所有 batch 的最大公约数的均值
-        # if all_batch_gcds:
-        #     return math.ceil(sum(all_batch_gcds) / len(all_batch_gcds))
-        # else:
-        #     return None
+        
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
