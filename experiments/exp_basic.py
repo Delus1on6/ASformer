@@ -1,7 +1,6 @@
 import os
 import torch
-from model import Transformer, Informer, Reformer, Flowformer, Flashformer, \
-    ASformer, iInformer, iReformer, iFlowformer, iFlashformer
+from model import ASformer
 
 
 class Exp_Basic(object):
@@ -9,16 +8,7 @@ class Exp_Basic(object):
         self.args = args
         self.flag = args.flag
         self.model_dict = {
-            'Transformer': Transformer,
-            'Informer': Informer,
-            'Reformer': Reformer,
-            'Flowformer': Flowformer,
-            'Flashformer': Flashformer,
             'ASformer': ASformer,
-            'iInformer': iInformer,
-            'iReformer': iReformer,
-            'iFlowformer': iFlowformer,
-            'iFlashformer': iFlashformer,
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)
