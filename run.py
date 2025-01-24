@@ -17,8 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('--flag', type=int, default=1, help='flag')
     parser.add_argument('--is_training', type=int, default=1, help='status')
     parser.add_argument('--model_id', type=str, default='test', help='model id')
-    parser.add_argument('--model', type=str, default='ASformer',
-                        help='model name, options: [ASformer, iInformer, iReformer, iFlowformer, iFlashformer]')
+    parser.add_argument('--model', type=str, default='ASformer', help='model name')
 
     # data loader
     parser.add_argument('--data', type=str, default='custom', help='dataset type')
