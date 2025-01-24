@@ -21,17 +21,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         super(Exp_Long_Term_Forecast, self).__init__(args)
 
     def _build_model(self):
-        # train_data, train_loader = self._get_data(flag='train')
-        # for i, (batch_x, _, _, _) in enumerate(train_loader):
-        #     batch_x = batch_x.float().to(self.device)
-        #     if self.args.use_norm:
-        #         # Normalization from Non-stationary Transformer
-        #         means = batch_x.mean(1, keepdim=True).detach()
-        #         batch_x = batch_x - means
-        #         stdev = torch.sqrt(torch.var(batch_x, dim=1, keepdim=True, unbiased=False) + 1e-5)
-        #         batch_x /= stdev
-        #     seg_num = self.calculate_gcd_period_mean(batch_x)
-        #     break
         if self.flag == 1:
             file_path = 'seg_num.txt'
             with open(file_path, 'r') as file:
@@ -46,47 +35,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
         return model
-
-    def calculate_gcd_period_mean(self, x):  # 傅里叶变换求周期
-        batch_size, time_steps, num_variates = x.shape
-        # all_batch_gcds = []
-
-        for batch in range(batch_size):
-            batch_periods = []
-            for variate in range(num_variates):
-                variate_data = x[batch, :, variate]
-                variate_data_without_dc = variate_data - torch.mean(variate_data)
-                # 对 tensor 数据进行傅里叶变换
-                X = torch.fft.fft(variate_data_without_dc)
-                magnitude_spectrum = torch.abs(X)
-                peak_indices = torch.argsort(magnitude_spectrum, dim=0)[-3:]  # 找到幅度谱中最大的两个峰值（除了直流分量 k = 0）
-                valid_periods = []
-                for peak_idx in peak_indices:
-                    if peak_idx != 0:
-                        # 计算周期估计值
-                        period_estimate = time_steps / peak_idx.item()
-                        valid_periods.append(period_estimate)
-                if valid_periods:
-                    average_period = sum(valid_periods) / len(valid_periods)
-                    batch_periods.append(average_period)
-
-            batch_periods = Counter(batch_periods)
-            counts = 2
-            batch_periods = [num for num in batch_periods if batch_periods[num] >= counts]
-            # 计算当前 batch 中所有特征周期的最大公约数
-            if batch_periods:
-                current_batch_gcd = int(math.floor(batch_periods[0]))
-                for period in batch_periods[1:]:
-                    current_batch_gcd = math.gcd(current_batch_gcd, int(math.floor(period)))
-                all_batch_gcds = current_batch_gcd
-                break
-        return all_batch_gcds
-
-        # # 计算所有 batch 的最大公约数的均值
-        # if all_batch_gcds:
-        #     return math.ceil(sum(all_batch_gcds) / len(all_batch_gcds))
-        # else:
-        #     return None
 
     def _get_data(self, flag):
         data_set, data_loader = data_provider(self.args, flag)
