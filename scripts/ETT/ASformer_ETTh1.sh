@@ -1,6 +1,6 @@
 export CUDA_VISIBLE_DEVICES=1
 
-model_name=iTransformer
+model_name=ASformer
 for flag in 0 1
 do
   python -u run.py \
