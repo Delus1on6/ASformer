@@ -43,13 +43,13 @@ class CrossAttentionLayer(nn.Module):
     input/output shape: [batch_size, Data_dim(D), Seg_num(L), d_model]
     '''
 
-    def __init__(self, attention, d_model, n_heads, seg_num, d_ff=None, factor=20, dropout=0.1):
+    def __init__(self, attention, d_model, n_heads, seg_num, d_ff=None, relay=20, dropout=0.1):
         super(CrossAttentionLayer, self).__init__()
         d_ff = d_ff or 4 * d_model
         self.time_attention = AttentionLayer(attention, d_model, n_heads)
         self.dim_sender = AttentionLayer(attention, d_model, n_heads, )
         self.dim_receiver = AttentionLayer(attention, d_model, n_heads)
-        self.router = nn.Parameter(torch.randn(seg_num, factor, d_model))
+        self.router = nn.Parameter(torch.randn(seg_num, relay, d_model))
         self.seg_num = seg_num
         self.dropout = nn.Dropout(dropout)
 
